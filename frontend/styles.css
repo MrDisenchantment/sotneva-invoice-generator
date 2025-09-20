@@ -1,0 +1,927 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+    background-color: #F0F9FF;
+}
+
+.container {
+    display: flex;
+    padding: 48px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    align-self: stretch;
+}
+
+.submit-button {
+    display: flex;
+    max-width: 600px;
+    padding: 8px 24px;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    border-radius: 8px;
+    background: #0071DA;
+    color: #fff;
+    outline: none;
+    border: none;
+    color: #FFF;
+    font-family: Inter;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    letter-spacing: -0.8px;
+}
+
+.submit-button:hover {
+    background-color: #1e8fff;
+}
+
+.item-unit {
+   display: flex;
+   height: 27px;
+    max-width: 60px;
+    padding: 5px 14px 7px 14px;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    border-radius: 4px;
+    background: #F4F4F4 !important;
+}
+
+.button-container {
+    display: flex;
+    width: 100%;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+/* Стили для Drag and Drop */
+.item-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+}
+
+/* Заголовок карточки с номером и кнопкой удаления */
+.item-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 43px;
+    padding-left: 24px;
+}
+
+.item-number {
+    color: #313131;
+    font-family: Inter;
+    font-size: 16px;
+    font-weight: 400;
+    letter-spacing: -0.8px;
+}
+
+/* Поле ввода названия товара */
+.item-name-input {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 43px;
+    padding-left: 24px;
+    border: 1px solid #E3E3E3;
+    border-radius: 12px;
+}
+
+.item-name {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 0;
+    background: transparent;
+    font-family: Inter;
+    font-size: 16px;
+    color: #313131;
+    border: none !important;
+    outline: none !important;
+    padding: 0 !important;
+    background: transparent !important;
+}
+
+/* Детали товара (количество, цена, итого) */
+.item-details {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+}
+
+/* Общие стили для полей ввода */
+.item-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0px 8px 0px 24px;
+    border: 1px solid #E3E3E3;
+    border-radius: 12px;
+    height: 43px;
+}
+
+.item-field.quantity {
+    min-width: 140px;
+
+}
+
+.item-field.price {
+    min-width: 120px;
+}
+
+/* Инпуты внутри полей */
+.item-quantity,
+.item-price {
+    border: none;
+    align-items: center !important;
+    outline: none;
+    padding: 0;
+    background: transparent;
+    font-family: Inter;
+    font-size: 16px;
+    color: #313131;
+    width: 60px;
+    border: none !important;
+    outline: none !important;
+    padding: 0 !important;
+    background: transparent !important;
+}
+
+.item-price {
+    width: 80px;
+}
+
+/* Поле единиц измерения */
+.item-unit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 60px !important;
+    height: 27px !important;
+    padding: 4px !important;
+    border: none !important;
+    outline: none !important;
+    border-radius: 4px !important;
+    background: #F4F4F4;
+    font-family: Inter;
+    font-size: 14px;
+    font-weight: 400;
+    color: #313131;
+    text-align: center;
+}
+
+.unit-container {
+    padding: 8px 0px;
+}
+
+/* Знаки умножения и равенства */
+.multiply-sign,
+.equals-sign {
+    color: #C9C9C9;
+    font-size: 16px;
+    font-weight: 400;
+    flex-shrink: 0;
+}
+
+/* Итоговая сумма */
+.item-total {
+    color: #313131;
+    font-family: Inter;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    letter-spacing: -0.8px;
+}
+
+/* Лейблы для полей */
+.label-for-input {
+    color: #C9C9C9;
+    font-family: Inter;
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: -0.6px;
+    flex-shrink: 0;
+}
+
+/* Кнопка добавления товара */
+#addItemButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: auto; /* Изменяем с 100% на auto */
+    padding: 8px 24px; /* Добавляем горизонтальный padding */
+    background-color: #fff;
+    color: #2196F3;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    align-self: flex-start; /* Выравниваем по левому краю */
+    color: #0071DA;
+    font-family: Inter;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    letter-spacing: -0.8px;
+}
+
+#addItemButton:hover {
+    background-color: #0071DA;
+    color: #FFF;
+}
+
+/* Кнопка удаления */
+.delete-button {
+    background-color: #fff;
+    padding: 8px 24px;
+    color: #E83636;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: Inter;
+    font-size: 16px;
+    transition: all 0.2s;
+}
+
+.delete-button:hover {
+    background-color: #da190b;
+    color: #FFF;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+    .item-details {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+    
+    .item-field {
+        min-width: unset;
+        width: 100%;
+    }
+    
+    .item-total {
+        margin-left: 0;
+        justify-content: center;
+        padding: 12px;
+        border-radius: 8px;
+    }
+}
+
+
+h1 {
+    display: flex;
+    padding: 48px;
+    padding-bottom: 0px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    align-self: stretch;
+    color: #111a44;
+    text-align: center;
+    font-family: Inter;
+    font-size: 40px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    letter-spacing: -2px;
+}
+
+.form-section {
+    display: flex;
+    max-width: 600px;
+    padding: 24px 24px 36px 24px;
+    margin-bottom: 12px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 24px;
+    align-self: stretch;
+    border-radius: 24px;
+    background: #FFF;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.07), 0 4px 10px 0 rgba(0, 0, 0, 0.05);
+}
+
+h2 {
+    display: flex;
+    width: 552px;
+    padding: 12px 24px;
+    justify-content: left;
+    align-items: left;
+    gap: 8px;
+    color: #313131;
+    font-family: Inter;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    letter-spacing: -0.8px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    flex: 1 0 0;
+    width: 100%;
+}
+
+.tooltip-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: #e0e0e0;
+    color: #666;
+    font-size: 12px;
+    margin-left: 6px;
+    cursor: help;
+    position: relative;
+}
+
+.tooltip-icon:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #333;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    width: max-content;
+    max-width: 300px;
+    z-index: 1000;
+    white-space: normal;
+}
+
+label {
+    display: flex;
+    padding: 12px 24px;
+    align-items: center;
+    gap: 8px;
+    align-self: stretch;
+}
+
+.input-uniter {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 12px;
+    align-self: stretch;
+}
+
+input[type="text"],
+input[type="date"],
+input[type="number"] {
+   display: flex;
+    height: 43px;
+    padding: 0px 24px 0px 24px;
+    align-items: center;
+    gap: 8px;
+    align-self: stretch;
+    border-radius: 12px;
+    border: 1px solid #E3E3E3;
+    background: #FFF;
+    overflow: hidden;
+    color: #313131;
+    text-overflow: ellipsis;
+    font-family: Inter;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    letter-spacing: -0.8px;
+}
+
+input::placeholder {
+    color: #E3E3E3;
+    font-family: Inter;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    letter-spacing: -0.8px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 16px;
+    border-radius: 12px;
+}
+
+th, td {
+    border: 0px solid #ddd;
+    border-bottom: 1px solid #eee;
+    padding-left: 4px;
+    padding-right: 4px;
+    padding-top: 24px;
+    padding-bottom: 24px;
+    text-align: left;
+}
+
+th {
+    background-color: #fff;
+}
+
+/* ===== СТИЛИ ДЛЯ КАРТОЧЕК ТОВАРОВ ===== */
+
+/* Контейнер для всех карточек */
+#itemsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+}
+
+/* Карточка товара */
+.item-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+}
+
+/* Заголовок карточки с номером и кнопкой удаления */
+.item-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 43px;
+    padding-left: 24px;
+}
+
+.item-number {
+    color: #313131;
+    font-family: Inter;
+    font-size: 16px;
+    font-weight: 400;
+    letter-spacing: -0.8px;
+}
+
+/* Поле ввода названия товара */
+.item-name-input {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 43px;
+    padding-left: 24px;
+    border: 1px solid #E3E3E3;
+    border-radius: 12px;
+}
+
+.item-name {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 0;
+    background: transparent;
+    font-family: Inter;
+    font-size: 16px;
+    color: #313131;
+    border: none !important;
+    outline: none !important;
+    padding: 0 !important;
+    background: transparent !important;
+}
+
+/* Детали товара (количество, цена, итого) */
+.item-details {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+}
+
+/* Общие стили для полей ввода */
+.item-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0px 8px 0px 24px;
+    border: 1px solid #E3E3E3;
+    border-radius: 12px;
+    height: 43px;
+    justify-content: space-between;
+}
+
+.item-field.quantity {
+    min-width: 140px;
+
+}
+
+.item-field.price {
+    min-width: 120px;
+}
+
+/* Инпуты внутри полей */
+.item-quantity,
+.item-price {
+    border: none;
+    align-items: center !important;
+    outline: none;
+    padding: 0;
+    background: transparent;
+    font-family: Inter;
+    font-size: 16px;
+    color: #313131;
+    width: 100%;
+    border: none !important;
+    outline: none !important;
+    padding: 0 !important;
+    background: transparent !important;
+}
+
+.item-price {
+    width: 100%;
+    max-width: 188px;   
+}
+
+/* Поле единиц измерения */
+.item-unit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 60px !important;
+    height: 27px !important;
+    padding: 4px !important;
+    border: none !important;
+    outline: none !important;
+    border-radius: 4px !important;
+    background: #F4F4F4;
+    font-family: Inter;
+    font-size: 14px;
+    font-weight: 400;
+    color: #313131;
+    text-align: center;
+}
+
+.unit-container {
+    padding: 8px 0px;
+}
+
+
+/* Итоговая сумма */
+.item-total {
+    color: #313131;
+    font-family: Inter;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    letter-spacing: -0.8px;
+    max-width: 104px;
+    min-width: 104px;
+    display: flex;
+    gap: 4px;
+    flex-direction: row;
+}
+
+/* Лейблы для полей */
+.label-for-input {
+    color: #C9C9C9;
+    font-family: Inter;
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: -0.6px;
+    flex-shrink: 0;
+}
+
+/* Кнопка добавления товара */
+#addItemButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: auto; /* Изменяем с 100% на auto */
+    padding: 8px 24px; /* Добавляем горизонтальный padding */
+    background-color: #fff;
+    color: #2196F3;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    align-self: flex-start; /* Выравниваем по левому краю */
+    color: #0071DA;
+    font-family: Inter;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    letter-spacing: -0.8px;
+}
+
+#addItemButton:hover {
+    background-color: #0071DA;
+    color: #FFF;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+    /* Основные контейнеры */
+    .container {
+        padding: 24px 16px;
+    }
+    
+    h1 {
+        padding: 24px 16px 0px 16px;
+        font-size: 28px;
+        letter-spacing: -1px;
+    }
+    
+    .form-section {
+        max-width: 100%;
+        padding: 16px;
+        margin-bottom: 8px;
+    }
+    
+    h2 {
+        width: 100%;
+        padding: 8px 24px;
+        letter-spacing: -0.4px;
+    }
+    
+    /* Адаптивность для блоков input-uniter */
+    .input-uniter {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    /* Адаптивность для полей ввода */
+    input[type="text"],
+    input[type="date"],
+    input[type="number"] {
+        padding: 0px 16px;
+        font-size: 14px;
+        height: 40px;
+    }
+    
+    label {
+        padding: 8px 24px;
+        font-size: 16px;
+    }
+    
+    /* Адаптивность для блоков товаров */
+    .item-details {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+    
+    .item-field {
+        min-width: unset;
+        width: 100%;
+        padding: 0px 16px;
+    }
+    
+    .item-field.quantity,
+    .item-field.price {
+        min-width: unset;
+        height: 43px;
+    }
+    
+    /* Скрываем знаки умножения и равенства на мобильных */
+    .multiply-sign,
+    .equals-sign {
+        display: none;
+    }
+    
+    .item-total {
+        margin-left: 0;
+        justify-content: center;
+        padding: 24px;
+        border-radius: 8px;
+        text-align: end;
+    }
+    
+    /* Адаптивность для кнопок */
+    .submit-button {
+        max-width: 100%;
+        justify-content: center;
+    }
+    
+    .button-container {
+        flex-direction: column-reverse;
+        gap: 8px;
+        align-items: stretch;
+    }
+    
+    #addItemButton,
+    .delete-button {
+        width: auto;
+        justify-content: center;
+        padding: 24px;
+
+    text-align: end;
+    }
+    
+    /* Адаптивность для итоговых сумм */
+    .totals .form-group {
+        flex-direction: column;
+        gap: 4px;
+        align-items: flex-start;
+    }
+    
+    .total-amount {
+        font-size: 18px;
+        font-weight: 500;
+    }
+    
+    /* Адаптивность для поля НДС */
+    .nds-input {
+        max-width: 60px !important;
+    }
+    
+    /* Адаптивность для tooltip */
+    .tooltip-icon:hover::after {
+        left: -100px;
+        max-width: 250px;
+        font-size: 11px;
+    }
+}
+
+/* Дополнительные стили для очень маленьких экранов */
+@media (max-width: 480px) {
+    .container {
+        padding: 48px 8px;
+    }
+    
+    h1 {
+        font-size: 24px;
+        padding: 48px 8px 0px 8px;
+    }
+    
+    .form-section {
+        padding: 36px 12px;
+    }
+    
+    input[type="text"],
+    input[type="date"],
+    input[type="number"] {
+        padding: 0px 24px;
+        height: 43px;
+        font-size: 16px;
+    }
+    
+    .item-field {
+        padding: 0px 8px 0px 24px;
+        height: 36px;
+    }
+    
+    .tooltip-icon:hover::after {
+        left: -120px;
+        max-width: 200px;
+        font-size: 10px;
+        padding: 6px 8px;
+    }
+}
+.totals {
+    background-color: #fff;
+    border-radius: 12px;
+    width: 100%;
+}
+
+.totals .form-group {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between !important;
+    width: 100%;
+    margin-bottom: 12px;
+}
+
+.total-amount {
+    color: #313131;
+    font-family: Inter;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    letter-spacing: -0.8px;
+}
+
+.submit-button {
+    display: flex;
+    max-width: 600px;
+    padding: 8px 24px;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    border-radius: 8px;
+    background: #0071DA;
+    color: #fff;
+    outline: none;
+    border: none;
+    color: #FFF;
+    font-family: Inter;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    letter-spacing: -0.8px;
+}
+
+.submit-button:hover {
+    background-color: #1e8fff;
+}
+
+.item-unit {
+   display: flex;
+   height: 27px;
+    max-width: 60px;
+    padding: 5px 14px 7px 14px;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    border-radius: 4px;
+    background: #F4F4F4 !important;
+}
+
+.button-container {
+    display: flex;
+    width: 100%;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+/* Стили для мобильных устройств */
+@media (max-width: 768px) {
+    .item-card {
+        cursor: grab;
+    }
+    
+    .item-card:active {
+        cursor: grabbing;
+    }
+}
+
+/* Анимация градиентного переливания для кнопки загрузки */
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+/* Состояние загрузки для кнопки генерации */
+.submit-button.loading {
+    background: linear-gradient(
+        90deg,
+        #0071DA 25%,
+        #1e8fff 50%,
+        #0071DA 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s ease-in-out infinite;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.submit-button.loading:hover {
+    background: linear-gradient(
+        270deg,
+        #0071DA 25%,
+        #1e8fff 50%,
+        #0071DA 75%
+    );
+    background-size: 200% 100%;
+}
+
+
+.nds-input {
+    height: auto !important;
+    width: auto !important;
+    min-width: 20px !important;
+    max-width: 72px !important;
+    padding: 0px 12px !important;
+    box-sizing: border-box !important;
+}
+
+.nds-label {
+    padding: 0px 8px !important;
+}

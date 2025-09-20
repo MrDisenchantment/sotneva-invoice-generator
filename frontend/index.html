@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Генератор счетов</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <!-- Удаляем библиотеки для PDF -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script> -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script> -->
+    <!-- Добавляем библиотеку для работы с Excel -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/suggestions-jquery@22.6.0/dist/css/suggestions.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/suggestions-jquery@22.6.0/dist/js/jquery.suggestions.min.js"></script>
+</head>
+<body>
+    <h1>Генератор счетов на оплату</h1>
+    <div class="container">
+        
+        <form id="invoiceForm">
+            <!-- Шапка счета -->
+            <div class="form-section">
+                <h2>Шапка счета</h2>
+                <div class="input-uniter">
+                    <div class="form-group">
+                        <label for="invoiceNumber">Номер счета:</label>
+                        <input type="text" id="invoiceNumber">
+                    </div>
+                    <div class="form-group">
+                        <label for="invoiceDate">Дата составления:</label>
+                        <input type="date" id="invoiceDate">
+                    </div>
+                </div>
+            
+            <!-- Новое поле "Уведомление в шапке" -->
+            <div class="form-group">
+                <label for="headWarning">Уведомление в шапке:</label>
+                <input type="text" id="headWarning" value="Внимание! Оплата данного счета означает согласие с условиями поставки товара. Уведомление об оплате обязательно, в противном случае не гарантируется наличие товара на складе. Товар отпускается по факту прихода денег на р/с Поставщика, самовывозом, при наличии доверенности и паспорта.">
+            </div>
+            </div>
+
+            <!-- Информация о продавце -->
+            <div class="form-section">
+                <h2>Информация о продавце</h2>
+                <div class="form-group">
+                    <label for="receiverName">Наименование организации:
+                        <span class="tooltip-icon" data-tooltip="Начните вводить название организации, и система предложит варианты из базы данных. Выбор организации автоматически заполнит остальные поля.">?</span>
+                    </label>
+                    <input type="text" id="receiverName" placeholder="ООО 'Компания'">
+                </div>
+                    <div class="input-uniter">
+                        <div class="form-group">
+                            <label for="receiverINN">ИНН:
+                                <span class="tooltip-icon" data-tooltip="Идентификационный номер налогоплательщика (10 цифр для организаций, 12 цифр для ИП). При вводе корректного ИНН остальные поля заполнятся автоматически.">?</span>
+                            </label>
+                            <input type="text" id="receiverINN" placeholder="7701234567">
+                        </div>
+                        <div class="form-group">
+                            <label for="receiverKPP">КПП:
+                                <span class="tooltip-icon" data-tooltip="Код причины постановки на учет (9 цифр). Присваивается при постановке на учет в налоговом органе.">?</span>
+                            </label>
+                            <input type="text" id="receiverKPP" placeholder="770101001">
+                        </div>
+                    </div>
+                <div class="form-group">
+                    <label for="receiverAddress">Адрес:
+                        <span class="tooltip-icon" data-tooltip="Юридический адрес организации. Заполняется автоматически при выборе организации.">?</span>
+                    </label>
+                    <input type="text" id="receiverAddress" placeholder="г. Москва, ул. Ленина, д. 1, офис 123">
+                </div>
+                <div style="display: flex; padding: 12px 24px; flex-direction: column; align-items: flex-start; gap: 8px; align-self: stretch;"> 
+                    <div style="height: 1px; align-self: stretch; border-radius: 999px; background: #E3E3E3;"></div> 
+                </div>
+                <div class="input-uniter">
+                <div class="form-group">
+                    <label for="receiverBank">Банк продавца:
+                        <span class="tooltip-icon" data-tooltip="Начните вводить название банка или БИК, и система предложит подходящие варианты. При выборе банка автоматически заполнится БИК и корр. счет.">?</span>
+                    </label>
+                    <input type="text" id="receiverBank" placeholder="ПАО Сбербанк">
+                </div>
+                <div class="form-group">
+                    <label for="receiverBIK">БИК:
+                        <span class="tooltip-icon" data-tooltip="Банковский идентификационный код (9 цифр). При вводе БИК автоматически заполнится название банка и корр. счет.">?</span>
+                    </label>
+                    <input type="text" id="receiverBIK" placeholder="044525225">
+                </div>
+                </div>
+                <div class="form-group">
+                    <label for="receiverAccount">Расчетный счет:
+                        <span class="tooltip-icon" data-tooltip="20-значный номер расчетного счета организации в выбранном банке.">?</span>
+                    </label>
+                    <input type="text" id="receiverAccount" placeholder="4070 2810 1234 5012 3456">
+                </div>
+                <div class="form-group">
+                    <label for="receiverCorAccount">Корреспондентский счет:
+                        <span class="tooltip-icon" data-tooltip="20-значный номер корреспондентского счета банка. Заполняется автоматически при выборе банка.">?</span>
+                    </label>
+                    <input type="text" id="receiverCorAccount" placeholder="3010 1810 4000 0000 0225">
+                </div>
+                <div style="display: flex; padding: 12px 24px; flex-direction: column; align-items: flex-start; gap: 8px; align-self: stretch;"> 
+                    <div style="height: 1px; align-self: stretch; border-radius: 999px; background: #E3E3E3;"></div> 
+                </div>
+                <div class="form-group">
+                    <label for="receiverDirector">Руководитель/уполномоченное лицо:
+                        <span class="tooltip-icon" data-tooltip="ФИО руководителя организации. Заполняется автоматически при выборе организации, если информация доступна.">?</span>
+                    </label>
+                    <input type="text" id="receiverDirector" placeholder="Иванов Иван Иванович">
+                </div>
+                <div class="form-group">
+                    <label for="receiverAccountant">Главный бухгалтер:
+                        <span class="tooltip-icon" data-tooltip="ФИО главного бухгалтера организации.">?</span>
+                    </label>
+                    <input type="text" id="receiverAccountant" placeholder="Петрова Мария Сергеевна">
+                </div>
+            </div>
+
+            <!-- Информация о покупателе -->
+            <div class="form-section">
+                <h2>Информация о покупателе</h2>
+                <div class="form-group">
+                    <label for="payerName">Наименование организации:
+                        <span class="tooltip-icon" data-tooltip="Начните вводить название организации, и система предложит варианты из базы данных. Выбор организации автоматически заполнит остальные поля.">?</span>
+                    </label>
+                    <input type="text" id="payerName" placeholder="ООО 'Покупатель'">
+                </div>
+                <div class="input-uniter">
+                <div class="form-group">
+                    <label for="payerINN">ИНН:
+                        <span class="tooltip-icon" data-tooltip="Идентификационный номер налогоплательщика (10 цифр для организаций, 12 цифр для ИП). При вводе корректного ИНН остальные поля заполнятся автоматически.">?</span>
+                    </label>
+                    <input type="text" id="payerINN" placeholder="7701234567">
+                </div>
+                <div class="form-group">
+                    <label for="payerKPP">КПП:
+                        <span class="tooltip-icon" data-tooltip="Код причины постановки на учет (9 цифр). Присваивается при постановке на учет в налоговом органе.">?</span>
+                    </label>
+                    <input type="text" id="payerKPP" placeholder="770101001">
+                </div>
+                </div>
+                <div class="form-group">
+                    <label for="payerAddress">Адрес:
+                        <span class="tooltip-icon" data-tooltip="Юридический адрес организации. Заполняется автоматически при выборе организации.">?</span>
+                    </label>
+                    <input type="text" id="payerAddress" placeholder="г. Москва, ул. Пушкина, д. 10, офис 401">
+                </div>
+            </div>
+
+            <!-- Товары/услуги -->
+            <div class="form-section">
+                <h2>Товары/услуги</h2>
+                <div id="itemsContainer">
+                    <!-- Карточки товаров будут добавляться здесь динамически -->
+                </div>
+                <div class="button-container" style="display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-direction: row;">
+                    <button type="button" class="delete-button" onclick="clearAllItems()">Очистить</button>
+                    <button type="button" id="addItemButton">+ Добавить товар/услугу</button>
+                </div>
+            </div>
+
+
+            <!-- Итоговая информация -->
+            <div class="form-section">
+                <h2>Итого</h2>
+
+                <div class="totals">
+                    <div class="form-group" >
+                        <label>Сумма:</label>
+                        <label id="totalAmount" class="total-amount">0.00</label>
+                    </div>
+
+
+
+                    <!-- Добавляем поле для ввода НДС -->
+                    <div class="form-group">
+                        <div style="display: flex; align-items: center; gap: 0px;">
+                            <label for="vatRate" id="nds_title">НДС:
+                                <span class="tooltip-icon" data-tooltip="Введите процентное значение НДС. При значении 0 НДС не будет включен в расчет.">?</span>
+                            </label>
+                            <input class="nds-input" type="number" id="vatRate" value="20" min="0" max="100" step="any">
+                            <label class="nds-label">%</label>
+                        </div>
+                        <label id="vatAmount" class="total-amount">0.00</label>
+                    </div>
+
+
+
+
+                    <div class="form-group">
+                        <label>Всего к оплате:</label>
+                        <label id="grandTotal" class="total-amount">0.00</label>
+                    </div>
+                </div>
+            </div> 
+
+
+             <div style="display: flex; max-width: 600px; padding: 24px; flex-direction: column; align-items: flex-end; gap: 8px; align-self: stretch;">
+                <button type="submit" class="submit-button">Сгенерировать счет</button>
+            </div>
+
+        </form>
+    </div>
+    <script src="js/script.js"></script>
+</body>
+</html>
