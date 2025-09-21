@@ -2,10 +2,10 @@
   "name": "invoice-generator",
   "version": "1.0.0",
   "description": "Invoice generator with Excel template",
-  "main": "backend/server.js",
+  "main": "server.js",
+  "type": "module",
   "scripts": {
-    "start": "node backend/server.js",
-    "pm2": "pm2 start ecosystem.config.js --env production"
+    "start": "node ./server.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
