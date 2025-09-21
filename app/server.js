@@ -1,24 +1,34 @@
-const express = require('express');
-const cors = require('cors');
-const ExcelJS = require('exceljs');
-const path = require('path');
-const fs = require('fs').promises;
-const os = require('os');
-const libre = require('libreoffice-convert');
-const { start } = require('repl');
-require('dotenv').config();
+import express from 'express';
+import cors from 'cors';
+import ExcelJS from 'exceljs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import fs from 'fs/promises';
+import os from 'os';
+import libre from 'libreoffice-convert';
+import { config } from 'dotenv';
+
+config()
 
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, '../frontend')));
+
+// frontend
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+app.use(express.static(path.join(__dirname, './www')));
+
+app.get('/', function (req, res) {
+    res.sendFile(__dirname + '/index.html');
+});
 
 // Эндпоинт для получения токена DaData
 app.get('/api/dadata-token', (req, res) => {
     res.json({ token: process.env.DADATA_TOKEN });
 });
 
-app.post('/generate-invoice', async (req, res) => {
+app.post('/api/generate-invoice', async (req, res) => {
     try {
         const workbook = new ExcelJS.Workbook();
         await workbook.xlsx.readFile(path.join(__dirname, 'templates/schet-shablon.xlsx'));
@@ -223,7 +233,7 @@ app.post('/generate-invoice', async (req, res) => {
 
 const PORT = 3000;
 app.listen(PORT, () => {
-    console.log(`Сервер запущен на http://localhost:${PORT}`);
+    console.log(`server started on post: ${PORT}`);
 });
 
 const mergeCellsIfNeeded = (
