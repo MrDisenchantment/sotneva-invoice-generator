@@ -41,6 +41,12 @@
                 <label for="headWarning">Уведомление в шапке:</label>
                 <input type="text" id="headWarning" value="Внимание! Оплата данного счета означает согласие с условиями поставки товара. Уведомление об оплате обязательно, в противном случае не гарантируется наличие товара на складе. Товар отпускается по факту прихода денег на р/с Поставщика, самовывозом, при наличии доверенности и паспорта.">
             </div>
+            
+            <!-- Новое поле "Основание" -->
+            <div class="form-group">
+                <label for="foundation">Основание:</label>
+                <input type="text" id="foundation" placeholder="Договор №1 от 01.01.2026">
+            </div>
             </div>
 
             <!-- Информация о продавце -->
@@ -180,8 +186,13 @@
                             <label for="vatRate" id="nds_title">НДС:
                                 <span class="tooltip-icon" data-tooltip="Введите процентное значение НДС. При значении 0 НДС не будет включен в расчет.">?</span>
                             </label>
-                            <input class="nds-input" type="number" id="vatRate" value="20" min="0" max="100" step="any">
-                            <label class="nds-label">%</label>
+                            <select class="nds-input" id="vatRate">
+                                <option value="20">20%</option>
+                                <option value="10">10%</option>
+                                <option value="7">7%</option>
+                                <option value="5">5%</option>
+                                <option value="0">0%</option>
+                            </select>
                         </div>
                         <label id="vatAmount" class="total-amount">0.00</label>
                     </div>

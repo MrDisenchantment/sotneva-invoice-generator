@@ -71,80 +71,71 @@ function updateTotals() {
 // Функция для преобразования числа в слова (сумма прописью)
 function convertNumberToWords(num) {
     const units = ['', 'один', 'два', 'три', 'четыре', 'пять', 'шесть', 'семь', 'восемь', 'девять'];
-    const unitsF = ['', 'одна', 'две', 'три', 'четыре', 'пять', 'шесть', 'семь', 'восемь', 'девять']; // для тысяч (женский род)
+    const unitsF = ['', 'одна', 'две', 'три', 'четыре', 'пять', 'шесть', 'семь', 'восемь', 'девять'];
     const teens = ['десять', 'одиннадцать', 'двенадцать', 'тринадцать', 'четырнадцать', 'пятнадцать', 'шестнадцать', 'семнадцать', 'восемнадцать', 'девятнадцать'];
     const tens = ['', 'десять', 'двадцать', 'тридцать', 'сорок', 'пятьдесят', 'шестьдесят', 'семьдесят', 'восемьдесят', 'девяносто'];
     const hundreds = ['', 'сто', 'двести', 'триста', 'четыреста', 'пятьсот', 'шестьсот', 'семьсот', 'восемьсот', 'девятьсот'];
 
-    // Функция для склонения слов
     function declension(number, forms) {
         const cases = [2, 0, 1, 1, 1, 2];
         return forms[(number % 100 > 4 && number % 100 < 20) ? 2 : cases[Math.min(number % 10, 5)]];
     }
 
-    // Функция для преобразования трёхзначного числа
-    function convertHundreds(num, isFeminine = false) {
+    function convertHundreds(n, isFeminine = false) {
         let result = '';
-
-        if (num === 0) return '';
-
-        // Сотни
-        if (num >= 100) {
-            result += hundreds[Math.floor(num / 100)] + ' ';
-        }
-
-        // Десятки и единицы
-        const remainder = num % 100;
-
+        if (n === 0) return '';
+        if (n >= 100) result += hundreds[Math.floor(n / 100)] + ' ';
+        const remainder = n % 100;
         if (remainder >= 10 && remainder < 20) {
             result += teens[remainder - 10];
         } else {
-            if (remainder >= 20) {
-                result += tens[Math.floor(remainder / 10)] + ' ';
-            }
+            if (remainder >= 20) result += tens[Math.floor(remainder / 10)] + ' ';
             const unit = remainder % 10;
-            if (unit > 0) {
-                result += isFeminine ? unitsF[unit] : units[unit];
-            }
+            if (unit > 0) result += isFeminine ? unitsF[unit] : units[unit];
         }
-
         return result.trim();
     }
 
-    // Обрабатываем целую часть
-    const intPart = Math.floor(num);
-
-    if (intPart === 0) {
-        return 'ноль';
-    }
+    // Новая логика: добавляем валюту (рубли/копейки)
+    const amount = isNaN(num) ? 0 : Number(num);
+    const [rublesStr, kopeksStr] = amount.toFixed(2).split('.');
+    const rubles = parseInt(rublesStr, 10);
+    const kopeks = parseInt(kopeksStr, 10);
 
     let result = '';
-
-    // Миллиарды
-    if (intPart >= 1000000000) {
-        const billions = Math.floor(intPart / 1000000000);
-        result += convertHundreds(billions) + ' ' + declension(billions, ['миллиард', 'миллиарда', 'миллиардов']) + ' ';
+    if (rubles === 0) {
+        result = 'ноль';
+    } else {
+        const billions = Math.floor(rubles / 1000000000);
+        if (billions > 0) {
+            result += convertHundreds(billions) + ' ' + declension(billions, ['миллиард', 'миллиарда', 'миллиардов']) + ' ';
+        }
+        const millions = Math.floor((rubles % 1000000000) / 1000000);
+        if (millions > 0) {
+            result += convertHundreds(millions) + ' ' + declension(millions, ['миллион', 'миллиона', 'миллионов']) + ' ';
+        }
+        const thousands = Math.floor((rubles % 1000000) / 1000);
+        if (thousands > 0) {
+            result += convertHundreds(thousands, true) + ' ' + declension(thousands, ['тысяча', 'тысячи', 'тысяч']) + ' ';
+        }
+        const remainder = rubles % 1000;
+        if (remainder > 0) {
+            result += convertHundreds(remainder);
+        }
+        result = result.trim();
     }
 
-    // Миллионы
-    const millions = Math.floor((intPart % 1000000000) / 1000000);
-    if (millions > 0) {
-        result += convertHundreds(millions) + ' ' + declension(millions, ['миллион', 'миллиона', 'миллионов']) + ' ';
+    // Добавляем рубли с правильным склонением
+    result += ' ' + declension(rubles, ['рубль', 'рубля', 'рублей']);
+
+    // Если есть копейки — добавляем их цифрами и с правильным склонением
+    if (kopeks > 0) {
+        const kopStr = kopeks.toString().padStart(2, '0');
+        result += ` ${kopStr} ${declension(kopeks, ['копейка', 'копейки', 'копеек'])}`;
     }
 
-    // Тысячи
-    const thousands = Math.floor((intPart % 1000000) / 1000);
-    if (thousands > 0) {
-        result += convertHundreds(thousands, true) + ' ' + declension(thousands, ['тысяча', 'тысячи', 'тысяч']) + ' ';
-    }
-
-    // Единицы, десятки, сотни
-    const remainder = intPart % 1000;
-    if (remainder > 0) {
-        result += convertHundreds(remainder);
-    }
-
-    return result.trim();
+    // Первая буква заглавная
+    return result.charAt(0).toUpperCase() + result.slice(1);
 }
 
 // Функция для форматирования номера счета
@@ -170,8 +161,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Обработчик кнопки добавления товара
     document.getElementById('addItemButton').addEventListener('click', addTableRow);
 
-    // Обработчик отправки формы
-    // В обработчике отправки формы (около строки 180)
+    // Внутри обработчика отправки формы
     document.getElementById('invoiceForm').addEventListener('submit', async function (e) {
         e.preventDefault();
 
@@ -198,6 +188,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 '{{invoice_number}}': document.getElementById('invoiceNumber').value,
                 '{{invoice_date}}': document.getElementById('invoiceDate').value,
                 '{{head_warning}}': document.getElementById('headWarning').value,
+                '{{foundation}}': document.getElementById('foundation').value,
 
                 // Информация о контрагентах
                 '{{supplier_info}}': `${document.getElementById('receiverName').value}, ИНН ${document.getElementById('receiverINN').value}, КПП ${document.getElementById('receiverKPP').value}, ${document.getElementById('receiverAddress').value}`,
@@ -207,7 +198,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 '{{total_sum}}': document.getElementById('totalAmount').textContent,
                 '{{total_vat}}': document.getElementById('vatAmount').textContent,
                 '{{total_to_pay}}': document.getElementById('grandTotal').textContent,
-                '{{total_items_count}}': document.querySelectorAll('#itemsTableBody tr').length.toString(),
+                // БЫЛО: document.querySelectorAll('#itemsTableBody tr').length.toString(),
+                '{{total_items_count}}': document.querySelectorAll('.item-card').length.toString(),
                 '{{total_sum_text}}': convertNumberToWords(parseFloat(document.getElementById('grandTotal').textContent)),
                 '{{nds_title}}': (() => {
                     const vatRate = parseFloat(document.getElementById('vatRate').value) || 0;
@@ -344,7 +336,6 @@ document.addEventListener('DOMContentLoaded', function () {
             minChars: 4,
             onSelect: function (suggestion) {
                 $("#receiverBIK").val(suggestion.data.bic);
-                // Форматируем корреспондентский счет при автозаполнении
                 const formattedCorAccount = formatAccountNumber(suggestion.data.correspondent_account);
                 $("#receiverCorAccount").val(formattedCorAccount);
             }
@@ -356,8 +347,8 @@ document.addEventListener('DOMContentLoaded', function () {
             type: "BANK",
             minChars: 4,
             onSelect: function (suggestion) {
+                $("#receiverBIK").val(suggestion.data.bic); // ключевая строка
                 $("#receiverBank").val(suggestion.value);
-                // Форматируем корреспондентский счет при автозаполнении
                 const formattedCorAccount = formatAccountNumber(suggestion.data.correspondent_account);
                 $("#receiverCorAccount").val(formattedCorAccount);
             }
@@ -606,13 +597,14 @@ function updateTotals() {
 }
 
 // Добавить в DOMContentLoaded обработчик для поля НДС
+// DOMContentLoaded handler
 document.addEventListener('DOMContentLoaded', function () {
-    // Обработчик для поля НДС
-    document.getElementById('vatRate').addEventListener('input', function () {
+    // Обработчик для поля НДС — теперь для <select>
+    document.getElementById('vatRate').addEventListener('change', function () {
         updateTotals();
     });
 
-    // Инициализация заголовка НДС
+    // Инициализация заголовка НДС и первичный пересчет
     updateVatTitle();
 });
 
