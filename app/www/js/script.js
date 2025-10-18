@@ -1,6 +1,15 @@
 // Глобальные переменные
 let itemCounter = 1;
 
+// Функция для форматирования денежных значений с разделителями тысяч и копейками
+function formatMoney(value) {
+    const num = Number(value) || 0;
+    return new Intl.NumberFormat('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }).format(num).replace(/,/g, ' '); // Заменяем запятые на пробелы: 1 000 000.00
+}
+
 // Функция для добавления новой строки в таблицу товаров
 function addTableRow() {
     const tbody = document.getElementById('itemsTableBody');
@@ -200,7 +209,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 '{{total_to_pay}}': document.getElementById('grandTotal').textContent,
                 // БЫЛО: document.querySelectorAll('#itemsTableBody tr').length.toString(),
                 '{{total_items_count}}': document.querySelectorAll('.item-card').length.toString(),
-                '{{total_sum_text}}': convertNumberToWords(parseFloat(document.getElementById('grandTotal').textContent)),
+                '{{total_sum_text}}': convertNumberToWords(parseFloat(document.getElementById('grandTotal').textContent.replace(/\s/g, ''))),
                 '{{nds_title}}': (() => {
                     const vatRate = parseFloat(document.getElementById('vatRate').value) || 0;
                     return vatRate === 0 ? 'Без НДС' : `НДС (${vatRate}%)`;
@@ -216,7 +225,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 quantity: card.querySelector('.item-quantity').value,
                 unit: card.querySelector('.item-unit').value,
                 price: card.querySelector('.item-price').value,
-                sum: (parseFloat(card.querySelector('.item-quantity').value) || 0) * (parseFloat(card.querySelector('.item-price').value) || 0)
+                sum: formatMoney((parseFloat(card.querySelector('.item-quantity').value) || 0) * (parseFloat(card.querySelector('.item-price').value) || 0))
             }))
         };
 
@@ -543,10 +552,7 @@ function calculateRowTotal(itemCard) {
     const total = quantity * price;
 
     const totalElement = itemCard.querySelector('.total-value');
-    totalElement.textContent = total.toLocaleString('ru-RU', {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 2
-    });
+    totalElement.textContent = formatMoney(total);
 
     updateTotals();
 }
@@ -588,9 +594,9 @@ function updateTotals() {
     const vat = totalSum * (vatRate / 100); // Динамический НДС
     const grandTotal = totalSum + vat;
 
-    document.getElementById('totalAmount').textContent = totalSum.toFixed(2);
-    document.getElementById('vatAmount').textContent = vat.toFixed(2);
-    document.getElementById('grandTotal').textContent = grandTotal.toFixed(2);
+    document.getElementById('totalAmount').textContent = formatMoney(totalSum);
+    document.getElementById('vatAmount').textContent = formatMoney(vat);
+    document.getElementById('grandTotal').textContent = formatMoney(grandTotal);
 
     // Обновляем заголовок НДС
     updateVatTitle();
