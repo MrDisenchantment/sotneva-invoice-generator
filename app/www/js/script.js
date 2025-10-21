@@ -10,15 +10,6 @@ function formatMoney(value) {
     }).format(num).replace(/,/g, ' '); // Заменяем запятые на пробелы: 1 000 000.00
 }
 
-// Функция для форматирования денежных значений с разделителями тысяч и копейками
-function formatMoney(value) {
-    const num = Number(value) || 0;
-    return new Intl.NumberFormat('en-US', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    }).format(num).replace(/,/g, ' '); // Заменяем запятые на пробелы: 1 000 000.00
-}
-
 // Функция для добавления новой строки в таблицу товаров
 function addTableRow() {
     const tbody = document.getElementById('itemsTableBody');
