@@ -68,22 +68,22 @@ function calculateRowTotal(row) {
     const quantity = parseFloat(row.querySelector('.item-quantity').value) || 0;
     const price = parseFloat(row.querySelector('.item-price').value) || 0;
     const total = quantity * price;
-    row.querySelector('.item-total').value = total.toFixed(2);
+    row.querySelector('.item-total').value = formatMoney(total);
     updateTotals();
 }
 
-// Функция для обновления итоговых сумм
+// Функция для обновления итоговых сумм (старая версия)
 function updateTotals() {
     const totals = Array.from(document.getElementsByClassName('item-total'))
-        .map(input => parseFloat(input.value) || 0)
+        .map(input => parseFloat(input.value.replace(/\s/g, '')) || 0)
         .reduce((sum, current) => sum + current, 0);
 
     const vat = totals * 0.20; // НДС 20%
     const grandTotal = totals + vat;
 
-    document.getElementById('totalAmount').textContent = totals.toFixed(2);
-    document.getElementById('vatAmount').textContent = vat.toFixed(2);
-    document.getElementById('grandTotal').textContent = grandTotal.toFixed(2);
+    document.getElementById('totalAmount').textContent = formatMoney(totals);
+    document.getElementById('vatAmount').textContent = formatMoney(vat);
+    document.getElementById('grandTotal').textContent = formatMoney(grandTotal);
 }
 
 // Функция для форматирования даты в русский формат
@@ -250,7 +250,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 name: card.querySelector('.item-name').value,
                 quantity: card.querySelector('.item-quantity').value,
                 unit: card.querySelector('.item-unit').value,
-                price: card.querySelector('.item-price').value,
+                price: formatMoney(parseFloat(card.querySelector('.item-price').value) || 0),
                 sum: formatMoney((parseFloat(card.querySelector('.item-quantity').value) || 0) * (parseFloat(card.querySelector('.item-price').value) || 0))
             }))
         };
