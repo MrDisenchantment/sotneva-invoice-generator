@@ -211,6 +211,7 @@ app.post('/api/generate-invoice', async (req, res) => {
 
         const fileContent = await fs.readFile(tempFilePath);
 
+
         const pdfBuf = await new Promise((resolve, reject) => {
             libre.convert(fileContent, '.pdf', undefined, (err, done) => {
                 if (err) {

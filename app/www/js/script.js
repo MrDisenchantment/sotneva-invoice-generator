@@ -727,6 +727,36 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Инициализация заголовка НДС и первичный пересчет
     updateVatTitle();
+
+    // Обработчики для чекбокса дублирования ФИО
+    const directorField = document.getElementById('receiverDirector');
+    const accountantField = document.getElementById('receiverAccountant');
+    const copyCheckbox = document.getElementById('copyDirectorToAccountant');
+
+    // Функция для синхронизации полей
+    function syncDirectorToAccountant() {
+        if (copyCheckbox.checked) {
+            accountantField.value = directorField.value;
+            accountantField.disabled = true;
+            accountantField.style.backgroundColor = '#f5f5f5';
+        } else {
+            accountantField.disabled = false;
+            accountantField.style.backgroundColor = '';
+        }
+    }
+
+    // Обработчик изменения чекбокса
+    copyCheckbox.addEventListener('change', syncDirectorToAccountant);
+
+    // Обработчик изменения поля руководителя
+    directorField.addEventListener('input', function() {
+        if (copyCheckbox.checked) {
+            accountantField.value = directorField.value;
+        }
+    });
+
+    // Инициализация состояния при загрузке
+    syncDirectorToAccountant();
 });
 
 // Функция для очистки карточек товаров

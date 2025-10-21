@@ -117,10 +117,26 @@
                     <input type="text" id="receiverDirector" placeholder="Иванов Иван Иванович">
                 </div>
                 <div class="form-group">
+                    <div style="display: flex; align-items: center; gap: 8px; width: 100%; justify-content: space-between;">
                     <label for="receiverAccountant">Главный бухгалтер:
                         <span class="tooltip-icon" data-tooltip="ФИО главного бухгалтера организации.">?</span>
                     </label>
-                    <input type="text" id="receiverAccountant" placeholder="Петрова Мария Сергеевна">
+
+                    <div style="display: flex; align-items: center; gap: 8px; width: auto; padding-right: 24px;">
+                        <div class="switch-container">
+                            <span class="switch-label">Как у руководителя</span>
+                            <label class="switch" for="copyDirectorToAccountant">
+                                <input type="checkbox" id="copyDirectorToAccountant">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    </div>
+
+                    <div style="display: flex; width: 100%; align-items: center; gap: 8px;">
+                        <input type="text" id="receiverAccountant" placeholder="Петрова Мария Сергеевна" style="flex: 1;">
+                        
+                    </div>
                 </div>
             </div>
 
