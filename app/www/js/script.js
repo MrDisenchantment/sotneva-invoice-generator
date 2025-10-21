@@ -154,11 +154,9 @@ function convertNumberToWords(num) {
     // Добавляем рубли с правильным склонением
     result += ' ' + declension(rubles, ['рубль', 'рубля', 'рублей']);
 
-    // Если есть копейки — добавляем их цифрами и с правильным склонением
-    if (kopeks > 0) {
-        const kopStr = kopeks.toString().padStart(2, '0');
-        result += ` ${kopStr} ${declension(kopeks, ['копейка', 'копейки', 'копеек'])}`;
-    }
+    // Всегда добавляем копейки цифрами и с правильным склонением
+    const kopStr = kopeks.toString().padStart(2, '0');
+    result += ` ${kopStr} ${declension(kopeks, ['копейка', 'копейки', 'копеек'])}`;
 
     // Первая буква заглавная
     return result.charAt(0).toUpperCase() + result.slice(1);
