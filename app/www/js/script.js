@@ -77,6 +77,23 @@ function updateTotals() {
     document.getElementById('grandTotal').textContent = grandTotal.toFixed(2);
 }
 
+// Функция для форматирования даты в русский формат
+function formatDateToRussian(dateString) {
+    if (!dateString) return '';
+    
+    const months = [
+        'января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
+        'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'
+    ];
+    
+    const date = new Date(dateString);
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = months[date.getMonth()];
+    const year = date.getFullYear();
+    
+    return `${day} ${month} ${year}г.`;
+}
+
 // Функция для преобразования числа в слова (сумма прописью)
 function convertNumberToWords(num) {
     const units = ['', 'один', 'два', 'три', 'четыре', 'пять', 'шесть', 'семь', 'восемь', 'девять'];
@@ -195,7 +212,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 // Информация о счете
                 '{{invoice_number}}': document.getElementById('invoiceNumber').value,
-                '{{invoice_date}}': document.getElementById('invoiceDate').value,
+                '{{invoice_date}}': formatDateToRussian(document.getElementById('invoiceDate').value),
                 '{{head_warning}}': document.getElementById('headWarning').value,
                 '{{foundation}}': document.getElementById('foundation').value,
 
@@ -397,7 +414,8 @@ $(function () {
 function generateInvoice() {
     // Получаем данные из формы
     const invoiceData = {
-        // ... существующий код сбора данных ...
+        invoiceNumber: document.getElementById('invoiceNumber').value,
+        invoiceDate: formatDateToRussian(document.getElementById('invoiceDate').value)
     };
 
     // Загружаем шаблон и генерируем файл
@@ -437,8 +455,8 @@ function generateInvoice() {
                 }
             });
 
-            // Заполняем данные в шаблоне
-            fillTemplate(ws, invoiceData);
+            // Заполняем данные в шаблоне (здесь должна быть логика заполнения шаблона)
+            // Пока что просто создаем новый файл с базовыми данными
 
             // Восстанавливаем стили и форматирование
             Object.keys(originalStyles).forEach(cell => {
