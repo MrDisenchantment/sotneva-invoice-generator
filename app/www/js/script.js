@@ -311,7 +311,26 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        // Подсказки для ИНН продавца с автозаполнением руководителя
+        // Подсказки для ИНН продавца
+        $("#receiverINN").suggestions({
+            token: dadataToken,
+            type: "PARTY",
+            minChars: 3,
+            onSelect: function (suggestion) {
+                const data = suggestion.data;
+                document.getElementById("receiverName").value = data.name.short_with_opf || data.name.full || '';
+                document.getElementById("receiverINN").value = data.inn || '';
+                document.getElementById("receiverKPP").value = data.kpp || '';
+                document.getElementById("receiverAddress").value = data.address.value || '';
+
+                // Автозаполнение данных руководителя
+                if (data.management && data.management.name) {
+                    document.getElementById("receiverDirector").value = data.management.name;
+                }
+            }
+        });
+
+        // Дополнительный обработчик для ввода ИНН продавца вручную
         $("#receiverINN").on("input", function () {
             const inn = this.value;
             if (inn.length >= 10) {
@@ -352,6 +371,86 @@ document.addEventListener('DOMContentLoaded', function () {
                 document.getElementById("payerINN").value = data.inn || '';
                 document.getElementById("payerKPP").value = data.kpp || '';
                 document.getElementById("payerAddress").value = data.address.value || '';
+            }
+        });
+
+        // Подсказки для ИНН покупателя
+        $("#payerINN").suggestions({
+            token: dadataToken,
+            type: "PARTY",
+            minChars: 3,
+            onSelect: function (suggestion) {
+                const data = suggestion.data;
+                document.getElementById("payerName").value = data.name.short_with_opf || data.name.full || '';
+                document.getElementById("payerINN").value = data.inn || '';
+                document.getElementById("payerKPP").value = data.kpp || '';
+                document.getElementById("payerAddress").value = data.address.value || '';
+            }
+        });
+
+        // Дополнительный обработчик для ввода ИНН покупателя вручную
+        $("#payerINN").on("input", function () {
+            const inn = this.value;
+            if (inn.length >= 10) {
+                fetch("https://suggestions.dadata.ru/suggestions/api/4_1/rs/findById/party", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Accept": "application/json",
+                        "Authorization": "Token " + dadataToken
+                    },
+                    body: JSON.stringify({ query: inn })
+                })
+                    .then(response => response.json())
+                    .then(result => {
+                        if (result.suggestions && result.suggestions[0]) {
+                            const company = result.suggestions[0].data;
+                            document.getElementById("payerName").value = company.name.short_with_opf || company.name.full;
+                            document.getElementById("payerKPP").value = company.kpp || '';
+                            document.getElementById("payerAddress").value = company.address.value || '';
+                        }
+                    })
+                    .catch(error => console.log("error", error));
+            }
+        });
+
+        // Подсказки для ИНН покупателя
+        $("#payerINN").suggestions({
+            token: dadataToken,
+            type: "PARTY",
+            minChars: 3,
+            onSelect: function (suggestion) {
+                const data = suggestion.data;
+                document.getElementById("payerName").value = data.name.short_with_opf || data.name.full || '';
+                document.getElementById("payerINN").value = data.inn || '';
+                document.getElementById("payerKPP").value = data.kpp || '';
+                document.getElementById("payerAddress").value = data.address.value || '';
+            }
+        });
+
+        // Дополнительный обработчик для ввода ИНН покупателя вручную
+        $("#payerINN").on("input", function () {
+            const inn = this.value;
+            if (inn.length >= 10) {
+                fetch("https://suggestions.dadata.ru/suggestions/api/4_1/rs/findById/party", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Accept": "application/json",
+                        "Authorization": "Token " + dadataToken
+                    },
+                    body: JSON.stringify({ query: inn })
+                })
+                    .then(response => response.json())
+                    .then(result => {
+                        if (result.suggestions && result.suggestions[0]) {
+                            const company = result.suggestions[0].data;
+                            document.getElementById("payerName").value = company.name.short_with_opf || company.name.full;
+                            document.getElementById("payerKPP").value = company.kpp || '';
+                            document.getElementById("payerAddress").value = company.address.value || '';
+                        }
+                    })
+                    .catch(error => console.log("error", error));
             }
         });
 
