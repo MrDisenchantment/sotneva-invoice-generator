@@ -18,8 +18,8 @@ function addTableRow() {
         <td><input type="text" class="item-name"></td>
         <td><input type="number" class="item-quantity" min="1" value="1"></td>
         <td><input type="text" class="item-unit" value="шт."></td>
-        <td><input type="number" class="item-price" value="0" step="0,001"></td>
-        <td><input type="number" class="item-total" value="0" step="0,001"></td>
+        <td><input type="number" class="item-price" value="0" step="0,01"></td>
+        <td><input type="number" class="item-total" value="0" step="0,01"></td>
         <td><button type="button" class="delete-button">Удалить</button></td>
     `;
     tbody.appendChild(tr);
@@ -618,7 +618,7 @@ function addTableRow() {
             <span class="multiply-sign">×</span>
             <div class="item-field price">
                 <div class="label-for-input">Цена:</div>
-                <input type="number" class="item-price" value="" step="0,001">
+                <input type="number" class="item-price" value="" step="0,01">
             </div>
             <span class="equals-sign">=</span>
             <div class="item-total">
