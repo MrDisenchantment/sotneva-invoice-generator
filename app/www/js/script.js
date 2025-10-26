@@ -16,7 +16,7 @@ function addTableRow() {
     const tr = document.createElement('tr');
     tr.innerHTML = `
         <td><input type="text" class="item-name"></td>
-        <td><input type="number" class="item-quantity" min="1" value="1"></td>
+        <td><input type="number" class="item-quantity" min="0" step="any" inputmode="decimal"></td>
         <td><input type="text" class="item-unit" value="шт."></td>
         <td><input step="any" inputmode="decimal" class="item-price" min="0" value="0"></td>
         <td><input step="any" inputmode="decimal" class="item-total" min="0" value="0"></td>
@@ -608,7 +608,7 @@ function addTableRow() {
         <div class="item-details">
             <div class="item-field quantity">
                 <div class="label-for-input">Кол-во:</div>
-                <input type="number" class="item-quantity" min="1" value="">
+                <input type="number" class="item-quantity" min="0" step="any" inputmode="decimal" value="">
                 <div class="unit-container">
                 <input type="text" class="item-unit" value="шт.">
                 </div>
@@ -616,7 +616,7 @@ function addTableRow() {
             <span class="multiply-sign">×</span>
             <div class="item-field price">
                 <div class="label-for-input">Цена:</div>
-                <input type="number" class="item-price" value="" min="1" step="any" inputmode="decimal">
+                <input type="number" class="item-price" value="" min="0" step="any" inputmode="decimal">
             </div>
             <span class="equals-sign">=</span>
             <div class="item-total">
