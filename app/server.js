@@ -171,12 +171,11 @@ app.post('/api/generate-invoice', async (req, res) => {
             console.log(`✓ Единица: ${item.unit}`);
 
             // Цена
-            currentRow.getCell(columnMapping.price).value = formatSum(item.price);
+            currentRow.getCell(columnMapping.price).value = parseFloat(item.price);
             console.log(`✓ Цена: ${item.price}`);
 
             // Сумма - используем готовое значение
-            let parsedSum = parseFloat(item.price) * item.quantity
-            currentRow.getCell(columnMapping.sum[0]).value = formatSum(parsedSum);
+            currentRow.getCell(columnMapping.sum[0]).value = parseFloat(item.price * item.quantity);
             console.log(`✓ Сумма: ${item.total}`);
 
             // Устанавливаем высоту строки как в шаблоне
@@ -193,14 +192,14 @@ app.post('/api/generate-invoice', async (req, res) => {
 
         // Используем готовое значение для итоговой суммы
         if (req.body.totalSum) {
-            totalRow.getCell(columnMapping.sum[0]).value = formatSum(req.body.totalSum);
+            totalRow.getCell(columnMapping.sum[0]).value = parseFloat(req.body.totalSum);
         } else {
             // Если итоговая сумма не предоставлена, считаем сумму всех товаров
             let total = 0;
             items.forEach(item => {
-                total += parseFloat(item.price) * item.quantity;
+                total += parseFloat(item.price * item.quantity);
             });
-            totalRow.getCell(columnMapping.sum[0]).value = formatSum(total);
+            totalRow.getCell(columnMapping.sum[0]).value = total;
         }
 
         // Генерируем файл
@@ -275,12 +274,4 @@ function getColumnLetter(col) {
         col = Math.floor((col - 1) / 26);
     }
     return letter;
-}
-
-function formatSum(p) {
-    let number = parseFloat(p)
-
-    if (isNaN(number)) return p;
-
-    return number
 }
