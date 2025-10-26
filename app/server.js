@@ -191,8 +191,8 @@ app.post('/api/generate-invoice', async (req, res) => {
         const totalRow = worksheet.getRow(lastItemRow + 1);
 
         // Используем готовое значение для итоговой суммы
-        if (req.body.replacements.total_sum) {
-            totalRow.getCell(columnMapping.sum[0]).value = req.body.replacements.total_sum;
+        if (req.body.replacements["{{total_sum}}"]) {
+            totalRow.getCell(columnMapping.sum[0]).value = req.body.replacements["{{total_sum}}"];
         } else {
             // Если итоговая сумма не предоставлена, считаем сумму всех товаров
             let total = 0;
