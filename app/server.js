@@ -198,7 +198,7 @@ app.post('/api/generate-invoice', async (req, res) => {
             // Если итоговая сумма не предоставлена, считаем сумму всех товаров
             let total = 0;
             items.forEach(item => {
-                total += parseFloat(item.price * item.quantity);
+                total += parseFloat(item.price) * item.quantity;
             });
             totalRow.getCell(columnMapping.sum[0]).value = formatSum(total);
         }

@@ -18,8 +18,8 @@ function addTableRow() {
         <td><input type="text" class="item-name"></td>
         <td><input type="number" class="item-quantity" min="1" value="1"></td>
         <td><input type="text" class="item-unit" value="шт."></td>
-        <td><input type="number" class="item-price" value="0" step="0,01"></td>
-        <td><input type="number" class="item-total" value="0" step="0,01"></td>
+        <td><input step="any" inputmode="decimal" class="item-price" value="0"></td>
+        <td><input step="any" inputmode="decimal" class="item-total" value="0"></td>
         <td><button type="button" class="delete-button">Удалить</button></td>
     `;
     tbody.appendChild(tr);
@@ -80,17 +80,17 @@ function updateTotals() {
 // Функция для форматирования даты в русский формат
 function formatDateToRussian(dateString) {
     if (!dateString) return '';
-    
+
     const months = [
         'января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
         'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'
     ];
-    
+
     const date = new Date(dateString);
     const day = date.getDate().toString().padStart(2, '0');
     const month = months[date.getMonth()];
     const year = date.getFullYear();
-    
+
     return `${day} ${month} ${year}г.`;
 }
 
@@ -749,7 +749,7 @@ document.addEventListener('DOMContentLoaded', function () {
     copyCheckbox.addEventListener('change', syncDirectorToAccountant);
 
     // Обработчик изменения поля руководителя
-    directorField.addEventListener('input', function() {
+    directorField.addEventListener('input', function () {
         if (copyCheckbox.checked) {
             accountantField.value = directorField.value;
         }
