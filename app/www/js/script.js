@@ -616,7 +616,7 @@ function addTableRow() {
             <span class="multiply-sign">×</span>
             <div class="item-field price">
                 <div class="label-for-input">Цена:</div>
-                <input type="number" class="item-price" value="" step="0,01">
+                <input type="number" class="item-price" value="" min="1" step="any" inputmode="decimal">
             </div>
             <span class="equals-sign">=</span>
             <div class="item-total">
