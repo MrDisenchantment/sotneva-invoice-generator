@@ -175,7 +175,8 @@ app.post('/api/generate-invoice', async (req, res) => {
             console.log(`✓ Цена: ${item.price}`);
 
             // Сумма - используем готовое значение
-            currentRow.getCell(columnMapping.sum[0]).value = formatSum(item.price * item.quantity);
+            let parsedSum = parseFloat(item.price) * item.quantity
+            currentRow.getCell(columnMapping.sum[0]).value = formatSum(parsedSum);
             console.log(`✓ Сумма: ${item.total}`);
 
             // Устанавливаем высоту строки как в шаблоне
@@ -277,35 +278,9 @@ function getColumnLetter(col) {
 }
 
 function formatSum(p) {
-    // Если не число — возвращаем как есть
-    if (isNaN(p) || p === null || p === '') return p;
+    let number = parseFloat(p)
 
-    // Преобразуем в строку
-    let str = String(p);
+    if (isNaN(number)) return p;
 
-    // Проверяем, есть ли точка (дробная часть)
-    if (!str.includes('.')) {
-        return str + '.00';
-    }
-
-    // Разбиваем на целую и дробную части
-    let [intPart, decPart] = str.split('.');
-
-    // Если нет дробной части — добавляем
-    if (decPart === undefined || decPart.length === 0) {
-        return intPart + '.00';
-    }
-
-    // Если одна цифра — добавляем ноль
-    if (decPart.length === 1) {
-        return intPart + '.' + decPart + '0';
-    }
-
-    // Если больше двух знаков — округляем
-    if (decPart.length > 2) {
-        return parseFloat(str).toFixed(2);
-    }
-
-    // Если ровно два знака — возвращаем как есть
-    return str;
+    return number.toFixed(2)
 }

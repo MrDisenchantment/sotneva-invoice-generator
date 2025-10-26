@@ -1,0 +1,45 @@
+curl -X POST http://localhost:3000/api/generate-invoice \
+  -H "Content-Type: application/json" \
+  -d '{
+    "replacements": {
+      "{{bank_name}}": "",
+      "{{bik}}": "",
+      "{{cor_account}}": "",
+      "{{inn}}": "",
+      "{{kpp}}": "",
+      "{{account}}": "",
+      "{{recipient}}": "",
+      "{{invoice_number}}": "",
+      "{{invoice_date}}": "26 октября 2025г.",
+      "{{head_warning}}": "Внимание! Оплата данного счета означает согласие с условиями поставки товара...",
+      "{{foundation}}": "",
+      "{{supplier_info}}": ", ИНН , КПП , ",
+      "{{customer_info}}": ", ИНН , КПП , ",
+      "{{total_sum}}": "12 345 667 901 208 640.00",
+      "{{total_vat}}": "2 469 133 580 241 728.00",
+      "{{total_to_pay}}": "14 814 801 481 450 368.00",
+      "{{total_items_count}}": "2",
+      "{{total_sum_text}}": "Undefined один миллиард четыреста восемьдесят один миллион четыреста пятьдесят тысяч триста шестьдесят восемь рублей 00 копеек",
+      "{{nds_title}}": "НДС (20%)",
+      "{{director_name}}": "",
+      "{{accountant_name}}": ""
+    },
+    "items": [
+      {
+        "number": 1,
+        "name": "",
+        "quantity": "11111",
+        "unit": "шт.",
+        "price": "111 111.00",
+        "sum": "1 234 554 321.00"
+      },
+      {
+        "number": 2,
+        "name": "",
+        "quantity": "111111111111",
+        "unit": "шт.",
+        "price": "111 111.00",
+        "sum": "12 345 666 666 654 320.00"
+      }
+    ]
+  }'
