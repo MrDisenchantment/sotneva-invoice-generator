@@ -163,7 +163,7 @@ app.post('/api/generate-invoice', async (req, res) => {
             console.log(`✓ Наименование: ${item.name}`);
 
             // Количество
-            currentRow.getCell(columnMapping.quantity[0]).value = parseFloat(item.quantity);
+            currentRow.getCell(columnMapping.quantity[0]).value = item.quantity;
             console.log(`✓ Количество: ${item.quantity}`);
 
             // Единица измерения
@@ -171,12 +171,12 @@ app.post('/api/generate-invoice', async (req, res) => {
             console.log(`✓ Единица: ${item.unit}`);
 
             // Цена
-            currentRow.getCell(columnMapping.price).value = parseFloat(item.price);
+            currentRow.getCell(columnMapping.price).value = item.price;
             console.log(`✓ Цена: ${item.price}`);
 
             // Сумма - используем готовое значение
-            currentRow.getCell(columnMapping.sum[0]).value = parseFloat(item.price * item.quantity);
-            console.log(`✓ Сумма: ${item.total}`);
+            currentRow.getCell(columnMapping.sum[0]).value = item.sum;
+            console.log(`✓ Сумма: ${item.sum}`);
 
             // Устанавливаем высоту строки как в шаблоне
             currentRow.height = templateRow.height;
@@ -191,13 +191,13 @@ app.post('/api/generate-invoice', async (req, res) => {
         const totalRow = worksheet.getRow(lastItemRow + 1);
 
         // Используем готовое значение для итоговой суммы
-        if (req.body.totalSum) {
-            totalRow.getCell(columnMapping.sum[0]).value = parseFloat(req.body.totalSum);
+        if (req.body.replacements.total_sum) {
+            totalRow.getCell(columnMapping.sum[0]).value = req.body.replacements.total_sum;
         } else {
             // Если итоговая сумма не предоставлена, считаем сумму всех товаров
             let total = 0;
             items.forEach(item => {
-                total += parseFloat(item.price * item.quantity);
+                total += parseFloat(item.sum);
             });
             totalRow.getCell(columnMapping.sum[0]).value = total;
         }
