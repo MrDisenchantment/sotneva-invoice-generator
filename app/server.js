@@ -279,7 +279,7 @@ function getColumnLetter(col) {
 function formatSum(p) {
     let number = parseFloat(p)
 
-    if (isNaN(number)) return 'Invalid number';
+    if (isNaN(number)) return p;
 
     return number.toFixed(2)
 }
