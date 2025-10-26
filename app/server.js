@@ -277,9 +277,35 @@ function getColumnLetter(col) {
 }
 
 function formatSum(p) {
-    let number = parseFloat(p)
+    // Если не число — возвращаем как есть
+    if (isNaN(p) || p === null || p === '') return p;
 
-    if (isNaN(number)) return p;
+    // Преобразуем в строку
+    let str = String(p);
 
-    return number.toFixed(2)
+    // Проверяем, есть ли точка (дробная часть)
+    if (!str.includes('.')) {
+        return str + '.00';
+    }
+
+    // Разбиваем на целую и дробную части
+    let [intPart, decPart] = str.split('.');
+
+    // Если нет дробной части — добавляем
+    if (decPart === undefined || decPart.length === 0) {
+        return intPart + '.00';
+    }
+
+    // Если одна цифра — добавляем ноль
+    if (decPart.length === 1) {
+        return intPart + '.' + decPart + '0';
+    }
+
+    // Если больше двух знаков — округляем
+    if (decPart.length > 2) {
+        return parseFloat(str).toFixed(2);
+    }
+
+    // Если ровно два знака — возвращаем как есть
+    return str;
 }
