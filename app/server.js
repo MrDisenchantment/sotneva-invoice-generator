@@ -282,5 +282,5 @@ function formatSum(p) {
 
     if (isNaN(number)) return p;
 
-    return number.toFixed(2)
+    return number
 }
