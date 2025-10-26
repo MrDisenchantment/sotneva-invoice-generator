@@ -18,8 +18,8 @@ function addTableRow() {
         <td><input type="text" class="item-name"></td>
         <td><input type="number" class="item-quantity" min="1" value="1"></td>
         <td><input type="text" class="item-unit" value="шт."></td>
-        <td><input step="any" inputmode="decimal" class="item-price" value="0"></td>
-        <td><input step="any" inputmode="decimal" class="item-total" value="0"></td>
+        <td><input step="any" inputmode="decimal" class="item-price" min="0" value="0"></td>
+        <td><input step="any" inputmode="decimal" class="item-total" min="0" value="0"></td>
         <td><button type="button" class="delete-button">Удалить</button></td>
     `;
     tbody.appendChild(tr);
