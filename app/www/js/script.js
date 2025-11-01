@@ -1,6 +1,73 @@
 // Глобальные переменные
 let itemCounter = 1;
 
+// Статус системы обновления документов
+// variable already declared above
+// systemStatus уже объявлена выше, поэтому просто инициализируем
+systemStatus = null;
+
+// Функция для проверки статуса системы обновления документов
+async function checkSystemStatus() {
+    try {
+        const response = await fetch('/api/system-status');
+        const status = await response.json();
+        systemStatus = status;
+        
+        // Отображаем статус пользователю
+        displaySystemStatus(status);
+        
+        return status;
+    } catch (error) {
+        console.warn('Не удалось получить статус системы:', error);
+        systemStatus = {
+            status: 'unknown',
+            features: {
+                exceljs_formatting: true,
+                libreoffice_available: false,
+                document_update: true,
+                auto_formatting: 'basic'
+            },
+            message: 'Статус системы недоступен'
+        };
+        return systemStatus;
+    }
+}
+
+// Функция для отображения статуса системы
+function displaySystemStatus(status) {
+    // Создаем или обновляем элемент статуса
+    let statusElement = document.getElementById('system-status');
+    
+    if (!statusElement) {
+        statusElement = document.createElement('div');
+        statusElement.id = 'system-status';
+        statusElement.className = 'system-status';
+        
+        // Вставляем после заголовка
+        const header = document.querySelector('h1');
+        if (header && header.parentNode) {
+            header.parentNode.insertBefore(statusElement, header.nextSibling);
+        }
+    }
+    
+    const isFullSupport = status.features?.libreoffice_available;
+    const statusClass = isFullSupport ? 'status-full' : 'status-basic';
+    const statusIcon = isFullSupport ? '✅' : '⚠️';
+    
+    statusElement.innerHTML = `
+        <div class="status-indicator ${statusClass}">
+            <span class="status-icon">${statusIcon}</span>
+            <span class="status-text">
+                ${isFullSupport ? 
+                    'Полная поддержка обновления документов' : 
+                    'Базовая поддержка (LibreOffice недоступен)'
+                }
+            </span>
+            <span class="status-details" title="${status.message}">ℹ️</span>
+        </div>
+    `;
+}
+
 // Функция для форматирования денежных значений с разделителями тысяч и копейками
 function formatMoney(value) {
     const num = Number(value) || 0;
@@ -175,6 +242,9 @@ function formatAccountNumber(accountNumber) {
 
 // Единый обработчик DOMContentLoaded
 document.addEventListener('DOMContentLoaded', function () {
+    // Проверяем статус системы обновления документов
+    checkSystemStatus();
+    
     // Установка текущей даты
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('invoiceDate').value = today;
@@ -194,7 +264,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Добавляем состояние загрузки
         submitButton.classList.add('loading');
-        submitButton.textContent = 'Генерируется...';
+        
+        // Показываем разные сообщения в зависимости от статуса системы
+        if (systemStatus?.features?.libreoffice_available) {
+            submitButton.textContent = 'Генерируется и обновляется...';
+        } else {
+            submitButton.textContent = 'Генерируется (базовое обновление)...';
+        }
 
         // Собираем данные формы
         const formData = {
@@ -587,6 +663,22 @@ function generateInvoice() {
             console.error('Ошибка при генерации файла:', error);
             alert('Произошла ошибка при генерации файла: ' + error.message);
         });
+}
+
+// Глобальная переменная для хранения статуса системы
+let systemStatus = null;
+
+// Функция для проверки статуса системы обновления документов
+async function checkSystemStatus() {
+    try {
+        const response = await fetch('/api/system-status');
+        systemStatus = await response.json();
+        displaySystemStatus(systemStatus);
+    } catch (error) {
+        console.warn('Не удалось получить статус системы:', error);
+        systemStatus = null;
+        displaySystemStatus(null);
+    }
 }
 
 // Функция для добавления новой карточки товара
