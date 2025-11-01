@@ -7,8 +7,92 @@ import fs from 'fs/promises';
 import os from 'os';
 import libre from 'libreoffice-convert';
 import { config } from 'dotenv';
+import { spawn } from 'child_process';
 
 config()
+
+/**
+ * Функция для автоматического обновления документа LibreOffice
+ * Принудительно пересчитывает формулы, высоту строк, ширину столбцов и другие параметры форматирования
+ * @param {string} filePath - Путь к файлу Excel
+ * @returns {Promise<Buffer>} - Обновленный файл в виде буфера
+ */
+async function updateLibreOfficeDocument(filePath) {
+    return new Promise((resolve, reject) => {
+        // Создаем временный файл для обновленного документа
+        const updatedFilePath = filePath.replace('.xlsx', '_updated.xlsx');
+        
+        // Команда LibreOffice для открытия, обновления и сохранения документа
+        // --headless - запуск без GUI
+        // --calc - использовать Calc для Excel файлов
+        // --convert-to xlsx - конвертировать в xlsx (это принудительно пересчитает все)
+        // --outdir - директория для сохранения
+        const libreOfficeArgs = [
+            '--headless',
+            '--calc',
+            '--convert-to', 'xlsx',
+            '--outdir', path.dirname(updatedFilePath),
+            filePath
+        ];
+
+        console.log('Обновляем документ LibreOffice...');
+        
+        const libreOfficeProcess = spawn('libreoffice', libreOfficeArgs);
+        
+        let stderr = '';
+        
+        libreOfficeProcess.stderr.on('data', (data) => {
+            stderr += data.toString();
+        });
+        
+        libreOfficeProcess.on('close', async (code) => {
+            if (code !== 0) {
+                console.warn(`LibreOffice завершился с кодом ${code}, stderr: ${stderr}`);
+                // Если LibreOffice недоступен, возвращаем исходный файл
+                try {
+                    const originalBuffer = await fs.readFile(filePath);
+                    resolve(originalBuffer);
+                } catch (error) {
+                    reject(new Error(`Не удалось прочитать исходный файл: ${error.message}`));
+                }
+                return;
+            }
+            
+            try {
+                // Читаем обновленный файл
+                const updatedBuffer = await fs.readFile(updatedFilePath);
+                
+                // Удаляем временный файл
+                await fs.unlink(updatedFilePath).catch(e => 
+                    console.warn('Не удалось удалить временный файл:', e.message)
+                );
+                
+                console.log('Документ LibreOffice успешно обновлен');
+                resolve(updatedBuffer);
+            } catch (error) {
+                // Если не удалось прочитать обновленный файл, возвращаем исходный
+                console.warn('Не удалось прочитать обновленный файл, используем исходный:', error.message);
+                try {
+                    const originalBuffer = await fs.readFile(filePath);
+                    resolve(originalBuffer);
+                } catch (readError) {
+                    reject(new Error(`Не удалось прочитать исходный файл: ${readError.message}`));
+                }
+            }
+        });
+        
+        libreOfficeProcess.on('error', async (error) => {
+            console.warn('LibreOffice недоступен:', error.message);
+            // Если LibreOffice недоступен, возвращаем исходный файл
+            try {
+                const originalBuffer = await fs.readFile(filePath);
+                resolve(originalBuffer);
+            } catch (readError) {
+                reject(new Error(`LibreOffice недоступен и не удалось прочитать исходный файл: ${readError.message}`));
+            }
+        });
+    });
+}
 
 const app = express();
 app.use(cors());
@@ -23,9 +107,59 @@ app.get('/', function (req, res) {
     res.sendFile(__dirname + '/index.html');
 });
 
+/**
+ * Проверка доступности LibreOffice в системе
+ * @returns {Promise<boolean>} - true если LibreOffice доступен
+ */
+async function checkLibreOfficeAvailability() {
+    return new Promise((resolve) => {
+        const testProcess = spawn('libreoffice', ['--version']);
+        
+        testProcess.on('close', (code) => {
+            resolve(code === 0);
+        });
+        
+        testProcess.on('error', () => {
+            resolve(false);
+        });
+        
+        // Таймаут на случай зависания
+        setTimeout(() => {
+            testProcess.kill();
+            resolve(false);
+        }, 5000);
+    });
+}
+
 // Эндпоинт для получения токена DaData
 app.get('/api/dadata-token', (req, res) => {
     res.json({ token: process.env.DADATA_TOKEN });
+});
+
+// Эндпоинт для проверки статуса системы обновления документов
+app.get('/api/system-status', async (req, res) => {
+    try {
+        const libreOfficeAvailable = await checkLibreOfficeAvailability();
+        
+        res.json({
+            status: 'ok',
+            features: {
+                exceljs_formatting: true,
+                libreoffice_available: libreOfficeAvailable,
+                document_update: true,
+                auto_formatting: libreOfficeAvailable ? 'full' : 'basic'
+            },
+            message: libreOfficeAvailable 
+                ? 'Полная поддержка обновления документов через LibreOffice'
+                : 'Базовая поддержка обновления через ExcelJS (LibreOffice недоступен)'
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: 'error',
+            message: 'Ошибка при проверке статуса системы',
+            error: error.message
+        });
+    }
 });
 
 app.post('/api/generate-invoice', async (req, res) => {
@@ -186,6 +320,9 @@ app.post('/api/generate-invoice', async (req, res) => {
         });
 
         console.log(`\n=== Обработка товаров завершена ===`);
+        console.log('\n=== НАЧИНАЕМ ПРОЦЕСС ОБНОВЛЕНИЯ ДОКУМЕНТА ===');
+        console.log('Этап 1: Обновление итоговой суммы...');
+        
         // Обновляем итоговую сумму
         const lastItemRow = startRow + items.length - 1;
         const totalRow = worksheet.getRow(lastItemRow + 1);
@@ -193,6 +330,7 @@ app.post('/api/generate-invoice', async (req, res) => {
         // Используем готовое значение для итоговой суммы
         if (req.body.replacements["{{total_sum}}"]) {
             totalRow.getCell(columnMapping.sum[0]).value = req.body.replacements["{{total_sum}}"];
+            console.log(`✓ Итоговая сумма установлена из replacements: ${req.body.replacements["{{total_sum}}"]}`);            
         } else {
             // Если итоговая сумма не предоставлена, считаем сумму всех товаров
             let total = 0;
@@ -200,17 +338,40 @@ app.post('/api/generate-invoice', async (req, res) => {
                 total += parseFloat(item.sum);
             });
             totalRow.getCell(columnMapping.sum[0]).value = total;
+            console.log(`✓ Итоговая сумма рассчитана автоматически: ${total}`);
         }
+        
+        console.log('Этап 1 завершен: Итоговая сумма обновлена');
+        console.log('Этап 2: Генерация Excel файла...');
 
         // Генерируем файл
         const buffer = await workbook.xlsx.writeBuffer();
+        console.log('✓ Excel файл сгенерирован в буфер');
 
         const tempFilePath = path.join(os.tmpdir(), `invoice-${Date.now()}.xlsx`);
+        console.log(`Сохраняем временный файл: ${tempFilePath}`);
 
         await fs.writeFile(tempFilePath, buffer);
+        console.log('Этап 2 завершен: Файл Excel сохранен');
 
         const fileContent = await fs.readFile(tempFilePath);
+        console.log('Этап 3 завершен: Файл прочитан для конвертации');
+        
+        console.log('=== ПРОЦЕСС ПОДГОТОВКИ ФАЙЛА ЗАВЕРШЕН ===\n');}
 
+        // Затем обновляем документ через LibreOffice для финального пересчета
+        console.log('Запускаем обновление документа через LibreOffice...');
+        const updatedBuffer = await updateLibreOfficeDocument(tempFilePath);
+        
+        // Перезаписываем файл обновленной версией
+        await fs.writeFile(tempFilePath, updatedBuffer);
+        
+        const fileContent = await fs.readFile(tempFilePath);
+
+
+        // Затем обновляем документ через LibreOffice для финального пересчета
+        console.log('Запускаем расширенное обновление документа через LibreOffice...');
+        const updatedBuffer = await updateLibreOfficeWithMacro(tempFilePath);
 
         const pdfBuf = await new Promise((resolve, reject) => {
             libre.convert(fileContent, '.pdf', undefined, (err, done) => {
@@ -265,6 +426,253 @@ const mergeCellsIfNeeded = (
     }
 };
 
+
+/**
+ * Функция для обновления форматирования через ExcelJS
+ * Принудительно пересчитывает размеры ячеек и обновляет форматирование
+ * @param {ExcelJS.Workbook} workbook - Рабочая книга ExcelJS
+ */
+function updateWorkbookFormatting(workbook) {
+    console.log('Обновляем форматирование через ExcelJS...');
+    
+    workbook.eachSheet((worksheet) => {
+        // Принудительно пересчитываем высоту строк на основе содержимого
+        worksheet.eachRow((row, rowNumber) => {
+            let maxHeight = 15; // Минимальная высота строки
+            
+            row.eachCell({ includeEmpty: false }, (cell) => {
+                if (cell.value && typeof cell.value === 'string') {
+                    // Приблизительный расчет высоты на основе длины текста и ширины ячейки
+                    const textLength = cell.value.length;
+                    const estimatedLines = Math.ceil(textLength / 50); // Примерно 50 символов на строку
+                    const estimatedHeight = estimatedLines * 15; // 15 пунктов на строку
+                    maxHeight = Math.max(maxHeight, estimatedHeight);
+                }
+            });
+            
+            // Устанавливаем высоту строки, но не больше разумного максимума
+            row.height = Math.min(maxHeight, 100);
+        });
+        
+        // Автоматически подгоняем ширину столбцов
+        worksheet.columns.forEach((column, index) => {
+            if (column.values) {
+                let maxWidth = 10; // Минимальная ширина
+                
+                column.values.forEach(value => {
+                    if (value && typeof value === 'string') {
+                        maxWidth = Math.max(maxWidth, value.length * 1.2);
+                    } else if (value && typeof value === 'number') {
+                        maxWidth = Math.max(maxWidth, value.toString().length * 1.2);
+                    }
+                });
+                
+                // Устанавливаем ширину столбца, но не больше разумного максимума
+                column.width = Math.min(maxWidth, 50);
+            }
+        });
+        
+        // Принудительно обновляем все формулы
+        worksheet.eachRow((row) => {
+            row.eachCell((cell) => {
+                if (cell.formula) {
+                    // Принудительно пересчитываем формулу
+                    const formula = cell.formula;
+                    cell.formula = formula;
+                }
+            });
+        });
+    });
+    
+    console.log('Этап 1 завершен: Форматирование ExcelJS обновлено');
+    
+    console.log('Этап 2: Генерация файла Excel...');
+    // Генерируем файл
+    const buffer = await workbook.xlsx.writeBuffer();
+
+    const tempFilePath = path.join(os.tmpdir(), `invoice-${Date.now()}.xlsx`);
+    console.log(`Сохраняем временный файл: ${tempFilePath}`);
+
+    await fs.writeFile(tempFilePath, buffer);
+    console.log('Этап 2 завершен: Файл Excel сохранен');
+
+    const fileContent = await fs.readFile(tempFilePath);
+    console.log('Этап 3 завершен: Файл прочитан для конвертации');
+    
+    console.log('=== ПРОЦЕСС ПОДГОТОВКИ ФАЙЛА ЗАВЕРШЕН ===\n');}
+
+    // Затем обновляем документ через LibreOffice для финального пересчета
+    console.log('Запускаем расширенное обновление документа через LibreOffice...');
+    const updatedBuffer = await updateLibreOfficeWithMacro(tempFilePath);
+
+    const pdfBuf = await new Promise((resolve, reject) => {
+        libre.convert(fileContent, '.pdf', undefined, (err, done) => {
+            if (err) {
+                fs.unlink(tempFilePath).catch(e => console.error("Couldn't remove temp file", e));
+                return reject(err);
+            }
+            fs.unlink(tempFilePath).catch(e => console.error("Couldn't remove temp file", e));
+            resolve(done);
+        });
+    });
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename=invoice.pdf');
+    res.send(pdfBuf);
+}
+
+/**
+ * Расширенная функция обновления LibreOffice с макросами
+ * Использует встроенные команды LibreOffice для точного пересчета
+ * @param {string} filePath - Путь к файлу Excel
+ * @returns {Promise<Buffer>} - Обновленный файл в виде буфера
+ */
+async function updateLibreOfficeWithMacro(filePath) {
+    return new Promise((resolve, reject) => {
+        const updatedFilePath = filePath.replace('.xlsx', '_macro_updated.xlsx');
+        
+        // Создаем временный макрос для обновления документа
+        const macroCommands = [
+            '--headless',
+            '--calc',
+            '--eval',
+            // Макрос для обновления всех вычислений и форматирования
+            'Sub UpdateDocument\n' +
+            '    Dim oDoc As Object\n' +
+            '    oDoc = ThisComponent\n' +
+            '    \n' +
+            '    \' Пересчитываем все формулы\n' +
+            '    oDoc.calculateAll()\n' +
+            '    \n' +
+            '    \' Обновляем автоподбор высоты строк\n' +
+            '    Dim oSheets As Object\n' +
+            '    Dim oSheet As Object\n' +
+            '    Dim i As Integer\n' +
+            '    \n' +
+            '    oSheets = oDoc.getSheets()\n' +
+            '    For i = 0 To oSheets.getCount() - 1\n' +
+            '        oSheet = oSheets.getByIndex(i)\n' +
+            '        \' Автоподбор высоты всех строк\n' +
+            '        oSheet.getRows().setPropertyValue("OptimalHeight", True)\n' +
+            '        \' Автоподбор ширины всех столбцов\n' +
+            '        oSheet.getColumns().setPropertyValue("OptimalWidth", True)\n' +
+            '    Next i\n' +
+            '    \n' +
+            '    \' Сохраняем документ\n' +
+            '    oDoc.store()\n' +
+            'End Sub\n' +
+            'UpdateDocument',
+            filePath
+        ];
+
+        console.log('Обновляем документ LibreOffice с макросами...');
+        
+        const libreOfficeProcess = spawn('libreoffice', macroCommands);
+        
+        let stderr = '';
+        
+        libreOfficeProcess.stderr.on('data', (data) => {
+            stderr += data.toString();
+        });
+        
+        libreOfficeProcess.on('close', async (code) => {
+            // Независимо от результата макроса, пробуем стандартное обновление
+            try {
+                const standardUpdated = await updateLibreOfficeDocument(filePath);
+                resolve(standardUpdated);
+            } catch (error) {
+                reject(error);
+            }
+        });
+        
+        libreOfficeProcess.on('error', async (error) => {
+            console.warn('Макрос LibreOffice недоступен, используем стандартное обновление:', error.message);
+            try {
+                const standardUpdated = await updateLibreOfficeDocument(filePath);
+                resolve(standardUpdated);
+            } catch (standardError) {
+                reject(standardError);
+            }
+        });
+    });
+}
+
+async function updateLibreOfficeDocument(filePath) {
+    return new Promise((resolve, reject) => {
+        // Создаем временный файл для обновленного документа
+        const updatedFilePath = filePath.replace('.xlsx', '_updated.xlsx');
+        
+        // Команда LibreOffice для открытия, обновления и сохранения документа
+        // --headless - запуск без GUI
+        // --calc - использовать Calc для Excel файлов
+        // --convert-to xlsx - конвертировать в xlsx (это принудительно пересчитает все)
+        // --outdir - директория для сохранения
+        const libreOfficeArgs = [
+            '--headless',
+            '--calc',
+            '--convert-to', 'xlsx',
+            '--outdir', path.dirname(updatedFilePath),
+            filePath
+        ];
+
+        console.log('Обновляем документ LibreOffice...');
+        
+        const libreOfficeProcess = spawn('libreoffice', libreOfficeArgs);
+        
+        let stderr = '';
+        
+        libreOfficeProcess.stderr.on('data', (data) => {
+            stderr += data.toString();
+        });
+        
+        libreOfficeProcess.on('close', async (code) => {
+            if (code !== 0) {
+                console.warn(`LibreOffice завершился с кодом ${code}, stderr: ${stderr}`);
+                // Если LibreOffice недоступен, возвращаем исходный файл
+                try {
+                    const originalBuffer = await fs.readFile(filePath);
+                    resolve(originalBuffer);
+                } catch (error) {
+                    reject(new Error(`Не удалось прочитать исходный файл: ${error.message}`));
+                }
+                return;
+            }
+            
+            try {
+                // Читаем обновленный файл
+                const updatedBuffer = await fs.readFile(updatedFilePath);
+                
+                // Удаляем временный файл
+                await fs.unlink(updatedFilePath).catch(e => 
+                    console.warn('Не удалось удалить временный файл:', e.message)
+                );
+                
+                console.log('Документ LibreOffice успешно обновлен');
+                resolve(updatedBuffer);
+            } catch (error) {
+                // Если не удалось прочитать обновленный файл, возвращаем исходный
+                console.warn('Не удалось прочитать обновленный файл, используем исходный:', error.message);
+                try {
+                    const originalBuffer = await fs.readFile(filePath);
+                    resolve(originalBuffer);
+                } catch (readError) {
+                    reject(new Error(`Не удалось прочитать исходный файл: ${readError.message}`));
+                }
+            }
+        });
+        
+        libreOfficeProcess.on('error', async (error) => {
+            console.warn('LibreOffice недоступен:', error.message);
+            // Если LibreOffice недоступен, возвращаем исходный файл
+            try {
+                const originalBuffer = await fs.readFile(filePath);
+                resolve(originalBuffer);
+            } catch (readError) {
+                reject(new Error(`LibreOffice недоступен и не удалось прочитать исходный файл: ${readError.message}`));
+            }
+        });
+    });
+}
 
 function getColumnLetter(col) {
     let letter = '';
