@@ -354,10 +354,11 @@ app.post('/api/generate-invoice', async (req, res) => {
         await fs.writeFile(tempFilePath, buffer);
         console.log('Этап 2 завершен: Файл Excel сохранен');
 
-        const fileContent = await fs.readFile(tempFilePath);
+        // fileContent уже объявлен выше, просто читаем файл повторно
+        await fs.readFile(tempFilePath);
         console.log('Этап 3 завершен: Файл прочитан для конвертации');
         
-        console.log('=== ПРОЦЕСС ПОДГОТОВКИ ФАЙЛА ЗАВЕРШЕН ===\n');}
+        console.log('=== ПРОЦЕСС ПОДГОТОВКИ ФАЙЛА ЗАВЕРШЕН ===\n');
 
         // Затем обновляем документ через LibreOffice для финального пересчета
         console.log('Запускаем обновление документа через LibreOffice...');
@@ -371,7 +372,7 @@ app.post('/api/generate-invoice', async (req, res) => {
 
         // Затем обновляем документ через LibreOffice для финального пересчета
         console.log('Запускаем расширенное обновление документа через LibreOffice...');
-        const updatedBuffer = await updateLibreOfficeWithMacro(tempFilePath);
+        const macroUpdatedBuffer = await updateLibreOfficeWithMacro(tempFilePath);
 
         const pdfBuf = await new Promise((resolve, reject) => {
             libre.convert(fileContent, '.pdf', undefined, (err, done) => {
@@ -432,7 +433,7 @@ const mergeCellsIfNeeded = (
  * Принудительно пересчитывает размеры ячеек и обновляет форматирование
  * @param {ExcelJS.Workbook} workbook - Рабочая книга ExcelJS
  */
-function updateWorkbookFormatting(workbook) {
+async function updateWorkbookFormatting(workbook) {
     console.log('Обновляем форматирование через ExcelJS...');
     
     workbook.eachSheet((worksheet) => {
@@ -499,7 +500,7 @@ function updateWorkbookFormatting(workbook) {
     const fileContent = await fs.readFile(tempFilePath);
     console.log('Этап 3 завершен: Файл прочитан для конвертации');
     
-    console.log('=== ПРОЦЕСС ПОДГОТОВКИ ФАЙЛА ЗАВЕРШЕН ===\n');}
+    console.log('=== ПРОЦЕСС ПОДГОТОВКИ ФАЙЛА ЗАВЕРШЕН ===\n');
 
     // Затем обновляем документ через LibreOffice для финального пересчета
     console.log('Запускаем расширенное обновление документа через LibreOffice...');
@@ -520,6 +521,8 @@ function updateWorkbookFormatting(workbook) {
     res.setHeader('Content-Disposition', 'attachment; filename=invoice.pdf');
     res.send(pdfBuf);
 }
+
+
 
 /**
  * Расширенная функция обновления LibreOffice с макросами

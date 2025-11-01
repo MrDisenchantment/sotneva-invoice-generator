@@ -2,8 +2,9 @@
 let itemCounter = 1;
 
 // Статус системы обновления документов
-let systemStatus = null;
-let systemStatus = null;
+// variable already declared above
+// systemStatus уже объявлена выше, поэтому просто инициализируем
+systemStatus = null;
 
 // Функция для проверки статуса системы обновления документов
 async function checkSystemStatus() {
