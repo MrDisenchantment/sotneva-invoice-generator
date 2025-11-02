@@ -14,7 +14,7 @@ config()
 const CHARACTERS_PER_LINE = 90;
 
 // Функция для расчета высоты строки на основе длины текста
-function calculateRowHeight(textLength, baseHeight = 15) {
+function calculateRowHeight(textLength, baseHeight = 8) {
     const lines = Math.ceil(textLength / CHARACTERS_PER_LINE);
     return baseHeight * lines;
 }
