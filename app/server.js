@@ -10,6 +10,15 @@ import { config } from 'dotenv';
 
 config()
 
+// Константа для количества символов на строку для head_warning
+const CHARACTERS_PER_LINE = 90;
+
+// Функция для расчета высоты строки на основе длины текста
+function calculateRowHeight(textLength, baseHeight = 15) {
+    const lines = Math.ceil(textLength / CHARACTERS_PER_LINE);
+    return baseHeight * lines;
+}
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -39,7 +48,18 @@ app.post('/api/generate-invoice', async (req, res) => {
             row.eachCell((cell) => {
                 if (cell.value && typeof cell.value === 'string') {
                     Object.entries(req.body.replacements).forEach(([marker, value]) => {
-                        cell.value = cell.value.replace(marker, value);
+                        if (cell.value.includes(marker)) {
+                            cell.value = cell.value.replace(marker, value);
+                            
+                            // Специальная обработка для {{head_warning}} - автоматическое увеличение высоты строки
+                            if (marker === '{{head_warning}}' && value) {
+                                const newHeight = calculateRowHeight(value.length);
+                                row.height = newHeight;
+                                
+                                // Включаем перенос текста для ячейки
+                                cell.alignment = { ...cell.alignment, wrapText: true, vertical: 'top' };
+                            }
+                        }
                     });
                 }
             });
