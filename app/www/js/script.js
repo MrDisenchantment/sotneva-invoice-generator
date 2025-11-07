@@ -777,3 +777,16 @@ function clearAllItems() {
         console.log('Все карточки товаров очищены, добавлена новая пустая карточка');
     }
 }
+
+// Авто-изменение высоты для поля «Уведомление»
+const headWarningEl = document.getElementById('headWarning');
+const autoResizeTextarea = (el) => {
+    el.style.height = 'auto';
+    el.style.height = `${el.scrollHeight}px`;
+};
+if (headWarningEl) {
+    headWarningEl.style.overflow = 'hidden';
+    headWarningEl.style.resize = 'none';
+    autoResizeTextarea(headWarningEl); // первичная подгонка на загрузке
+    headWarningEl.addEventListener('input', () => autoResizeTextarea(headWarningEl));
+}

@@ -682,3 +682,25 @@ input:checked + .slider:before {
         padding: 6px 8px;
     }
 }
+
+/* Стили для textarea — выглядит как input, но растёт по высоте */
+textarea {
+    display: flex;
+    min-height: 43px;
+    height: auto;
+    padding: 12px 24px;
+    align-items: center;
+    gap: 8px;
+    align-self: stretch;
+    border-radius: 12px;
+    border: 1px solid #E3E3E3;
+    background: #FFF;
+    color: #313131;
+    font-family: Inter;
+    font-size: 16px;
+    font-weight: 400;
+    letter-spacing: -0.8px;
+    line-height: 1.4;
+    overflow: hidden; /* управляется JS */
+    resize: none;     /* управляется JS */
+}
